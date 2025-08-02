@@ -1,0 +1,67 @@
+clear variables; close all; clc
+
+% Geometry
+geo = importGeometry('espresso.step');
+geo = rotate(geo,90,[0,0,0],[1,0,0]);
+figure(1)
+pdegplot(geo,"FaceLabels","on",'FaceAlpha',0.3)
+
+% Mesh
+model = createpde("thermal","modal");
+model.Geometry = geo;
+h = 0.005;
+msh = generateMesh(model,'Hmin',h,'Hmax',h);
+figure(2)
+pdemesh(msh)
+
+%%
+% Material properties
+k = 3; % (W/mK)
+rho = 2000; % (kg/m3)
+Cp = 500; % (J/kgK)
+model.thermalProperties('ThermalConductivity',k, ...
+    "MassDensity",rho,"SpecificHeat",Cp);
+
+% Boundary conditions
+thermalBC(model,'Face',[1,3],'HeatFlux',0); % bottom
+thermalBC(model,'Face',[5,10], ...
+    'ConvectionCoefficient',100,'AmbientTemperature',80); % interior (coffee)
+thermalBC(model,'Face',[2,4,6,7,8,9], ...
+    'ConvectionCoefficient',15,'AmbientTemperature',20); % exterior (air)
+
+% Perform modal analysis
+sol = solve(model,'DecayRange',[0,1]);
+Phi = sol.ModeShapes;
+lambda = -sol.DecayRates;
+figure(3)
+for j=1:7
+    subplot(1,7,j)
+    pdeplot3D(model,'ColorMapData',Phi(:,j),'Mesh','on')
+    colorbar('off')
+end
+
+%%
+
+model.AnalysisType = 'transient';
+thermalIC(model,20);
+t = (0:1:360)'; m = length(t);
+sol = solve(model,t);
+X = sol.Temperature;
+
+mats = assembleFEMatrices(model,"M"); M = mats.M;
+phi = Phi(:,1); lam = lambda(1);
+c = phi'*M*(X(:,1)-X(:,end));
+X_1mode = phi*exp(lam*t')*c :+ X(:,end);
+
+for i=1:2:m
+    figure(4)
+    title({['Time = ' num2str(t(i)) 's']})
+    subplot(1,2,1)
+    pdeplot3D(model,'ColorMapData',X(:,i),'Mesh','on')
+    % clim([20,80])
+    subplot(1,2,2)
+    pdeplot3D(model,'ColorMapData',X_1mode(:,i),'Mesh','on')
+    % clim([20,80])
+    drawnow
+    pause(0.001)
+end
