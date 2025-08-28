@@ -73,22 +73,45 @@ axis tight
 xlabel('Rank')
 ylabel('Singular value')
 xlim([1,79])
+fontsize(18,'points')
 
 %%
-k=4;
+k=1;
 
 figure(2)
 subplot(1,3,1)
-imagesc(reshape(U(:,k),n,n)), colormap("bone"), axis equal, axis tight
+imagesc(reshape(U(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
 
 subplot(1,3,2)
-imagesc(reshape(Uc(:,k),n,n)), colormap("bone"), axis equal, axis tight
+imagesc(reshape(Uc(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
 
 subplot(1,3,3)
-imagesc(reshape(Ud(:,k),n,n)), colormap("bone"), axis equal, axis tight
+imagesc(reshape(Ud(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
 
 %%
+
+k = 1;
+r = 140;
+Ur = U(:,1:r);
+
 figure(3)
+
+subplot(2,2,1)
+imagesc(reshape(Ur*Ur'*C(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
+
+subplot(2,2,2)
+imagesc(reshape(Ur*Ur'*D(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
+
+subplot(2,2,3)
+imagesc(reshape(C(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
+
+subplot(2,2,4)
+imagesc(reshape(D(:,k),n,n)), colormap("bone"), axis equal, axis tight, axis off
+
+%%
+
+figure(4)
 bar(U(:,2)'*[C D])
 xlabel('column index')
 ylabel('alignment with u')
+fontsize(18,'points')

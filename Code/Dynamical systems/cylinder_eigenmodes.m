@@ -1,39 +1,44 @@
 clear all, close all, clc
 
 % Load eigenvalues
-eigs_file = importdata('../data/cylinder_flow/eigenvalues.txt');
+eigs_file = importdata('cylinder_eigenvalues.txt');
 lambda = eigs_file.data(:,4) + i*eigs_file.data(:,5);
 
-for mode=1:30
+f1 = figure('DefaultTextInterpreter','Latex'); 
 
-file_prefix = '/Users/benherrmann/KTH_Framework/run/ext_cyl_ARN/egvext_cyl0.f';
-filename = [file_prefix num2str(mode,'%05.f')];
-x = load_nek_field(filename,1);
-y = load_nek_field(filename,2);
-q = load_nek_field(filename,4);
-l = 0.7;
-clims = [-l*max(abs(q)), l*max(abs(q))];
-
-f1 = figure('DefaultTextInterpreter','Latex'); set(f1,'Position',[-1200 1000 750 200])
-
-subplot(1,21,[1,5])
-plot(imag(lambda),real(lambda),'bo')%,'MarkerSize',12)
+plot(imag(lambda),real(lambda),'bo','LineWidth',1.2,'MarkerFaceColor','b')
 hold on
-plot(imag(lambda(mode)),real(lambda(mode)),'rx','MarkerSize',12)
-plot([-8;8],[0;0],'color',[0.5 0.5 0.5])
+plot([-8;8],[0;0],'color',[0.5 0.5 0.5],'LineWidth',1.2)
 pbaspect([1.25 1 1])
 ylabel('$\lambda_r$')
 xlabel('$\lambda_i$')
-axis([-2.2,2.2 -0.42,0.2])
+fontsize(18,'points'), fontname('Times')
+xlim([-2.2,2.2]), ylim([-0.42,0.2])
+% axis equal
 hold off
+pbaspect([4 2 1])
+set(gcf,'Color','w')
 
-subplot(1,21,[8,21])
-plotCylinder_nek(x,y,q,clims);
+%% Load eigenmodes
+load('cylinder_eigenmodes.mat')
+ny = length(y);
+nx = length(x);
+x_eq = reshape(x_eq,nx,ny)';
+v1 = reshape(v1,nx,ny)';
+v2 = reshape(v2,nx,ny)';
 
-print(f1,['../plots/cyl_100_global_modes/mode_' num2str(mode,'%02.f')],'-depsc')
-
-end
-
-
-
-
+figure(2)
+q = v2;
+[xx,yy] = meshgrid(x,y);
+pcolor(xx,yy,q), shading interp
+axis equal, axis tight
+% colorbar(), 
+colormap(jet)
+clim(0.5*[-max(abs(q(:))),max(abs(q(:)))])
+xlim([-3,max(x)]);
+xlabel('x'), ylabel('y')
+fontsize(18,'points'), fontname('Times')
+hold on
+plot_cyl()
+hold off
+set(gcf,'Color','w')
