@@ -2,6 +2,7 @@
 clearvars; close all; clc;
 
 load('cylinder_flow.mat');
+
 q0 = mean(X,2);
 X = X - q0;
 nx = length(x); ny = length(y);
@@ -15,7 +16,7 @@ pcolor(reshape(q+q0,ny,nx))
 shading interp, axis equal, axis tight, axis off
 colormap('jet')
 colorbar()
-clim(0.4*[-max(abs(X(:,1))),max(abs(X(:,1)))])
+clim(0.6*[-max(abs(X(:,1))),max(abs(X(:,1)))])
 drawnow()
 
 end
